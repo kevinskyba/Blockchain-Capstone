@@ -1,3 +1,66 @@
-// Test if a new solution can be added for contract - SolnSquareVerifier
+var SolnSquareVerifier = artifacts.require('SolnSquareVerifier');
+var Verifier = artifacts.require('Verifier');
 
-// Test if an ERC721 token can be minted for contract - SolnSquareVerifier
+contract('SolnSquareVerifier', accounts => {
+
+    const account_one = accounts[0];
+    const account_two = accounts[1];
+
+    describe('Tests', function () {
+        beforeEach(async function () {
+            let verifier = await Verifier.new({from: account_one});
+            this.contract = await SolnSquareVerifier.new(verifier.address, {from: account_one});
+            this.proof = {
+                "proof": {
+                    "a": [
+                        "0x09551c0d29b0e77caa2d1e41044bbe6e2b59aa0a5f9e15af39cc89a1d3aad8f3",
+                        "0x18888faa6bc69f4f40c369b686b21f14398d3dca390dd6c23b8c50b98abe07c3"
+                    ],
+                    "b": [
+                        [
+                            "0x07eb2b10ea3af669cb5c2124ba5ec4bbb4d038da6d2d370fa036bdb32e9aa5ef",
+                            "0x24f54dc9794295ec0ae12d7d538556d9f0fd17edd5d90ba5a9d360e2cbe46a44"
+                        ],
+                        [
+                            "0x0cdaa2decc0e34857261a3e849f173669002071c2d627124ea42ce3e7bc1316a",
+                            "0x0389a0b6ae6e25bbdedddabfbcda67b4bea4581c3d565ac40a0bfacf05428cfb"
+                        ]
+                    ],
+                    "c": [
+                        "0x1702ce19fc8372db99ed3232a9ae97ff343adf87bf376c3a4cbd51805fefca7d",
+                        "0x25d601dad660e02a5cd69fc11978eb706537171c03b2823e64dcb0c2ebf7a156"
+                    ]
+                },
+                "inputs": [
+                    "0x0000000000000000000000000000000000000000000000000000000000000009",
+                    "0x0000000000000000000000000000000000000000000000000000000000000001"
+                ]
+            };
+        })
+
+        it('Test if an ERC721 token can be minted for contract - SolnSquareVerifier', async function () {
+            assert.equal(await this.contract.getOwner(), accounts[0], "Owner should be accounts[0]");
+
+            let noError = true;
+            try {
+                await this.contract.mintNFT.call(
+                    accounts[10],
+                    55,
+                    [this.proof["proof"]["a"][0],
+                    this.proof["proof"]["a"][1]],
+                    [this.proof["proof"]["b"][0][0],
+                    this.proof["proof"]["b"][0][1]],
+                    [this.proof["proof"]["b"][0][0],
+                    this.proof["proof"]["b"][0][1]],
+                    [this.proof["proof"]["c"][0],
+                    this.proof["proof"]["c"][1]],
+                    [this.proof["inputs"][0],
+                    this.proof["inputs"][1]]);
+            } catch (err) {
+                console.error(err);
+                noError = false;
+            }
+            assert.equal(noError, true, "Minting should work");
+        });
+    });
+});
